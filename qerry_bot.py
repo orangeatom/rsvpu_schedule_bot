@@ -7,29 +7,47 @@ bot = telebot.TeleBot(config.token)
 list_links = json.load(open('documents/links.json','r',encoding='utf-8'))
 
 
+@bot.message_handler(commands=['start'])
+def Hello_message(message):
+    #TODO need actual text
+    bot.send_message(message.chat.id, "Приветствую, я неинтеллектуально обученная система по рассылке расписания \n Вы можете ввести название группы или часть от ФИО преподавателя "
+                                      "и получить его расписание на сегодня (до 18 00) и на завтра (после 18 00)")
+
+@bot.message_handler(commands=['set_group'])
+def Add_user(message):
+    bot.send_message(message.chat.id, "Введите вашу группу, или Ваше имя, если вы являетесь преподавателем")
+    #todo need to add user and his status
+    pass
+
+@bot.message_handler(commands=['schedule'])
+def Add_user(message):
+    #todo
+    pass
+
+@bot.message_handler(commands=['schedule_t'])
+def Add_user(message):
+    #todo
+    pass
+
+@bot.message_handler(commands=['schedule_w'])
+def Add_user(message):
+    #todo
+    pass
+
+@bot.message_handler(commands=['distribution'])
+def Add_user(message):
+    #todo
+    pass
+
 @bot.message_handler(content_types=["text"])
 def repeat_all_messages(message):
-    print("alla")
     bot.send_chat_action(message.chat.id,'typing')
-    print(list_links['groups'])
-    if(message.text == "/start"):
-        print(str(message.chat.id) + " " + message.chat.username + " ")
-        text = 'long long long'
-        try:
-            bot.send_message(message.chat.id, "привет " + message.chat.first_name + " " + message.chat.last_name + text)
-        except:
-            bot.send_message(message.chat.id, "привет " + message.chat.username + text)
-    if (message.text == "/schedule"):
-        bot.send_message(message.chat.id, "schedule")
     if (message.text.strip().lower() in list_links['groups']):
         msg = get_schedule(message.text.strip().lower(),0)
         bot.send_message(message.chat.id, msg)
     elif (message.text.strip().lower() in list_links['lecturers']):
         msg = get_schedule(message.text.strip().lower(),1)
         bot.send_message(message.chat.id, msg)
-
-
-    print("user: " + str(message.chat.username) + " chat: " + str(message.chat.id))
 
 if __name__ == '__main__':
     bot.polling(none_stop=True)
