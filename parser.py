@@ -36,14 +36,19 @@ def update_links():
 
 #this function return all schedule
 def get_schedule(group,type):
+    """this function return schedule to one day"""
     #not change
     listgroup = json.load(open('documents/links.json', 'r', encoding='utf-8'))
-    if (type == 0):
-        site = requests.get(schedule_site + '?v_gru=' + listgroup['groups'][group])
-    else: site = requests.get(schedule_site + '?v_prep=' + listgroup['lecturers'][group])
+    if type == 0:
+        query_data = {'v_gru': listgroup['groups'][group]}
+    else:
+        query_data = {'v_prep': listgroup['lecturers'][group]}
+    site = requests.get(schedule_site, params = query_data)
+
     site.encoding = 'utf-8'
     bs = BeautifulSoup(site.text, 'html.parser')
     #not change
+
     Mylist = []
     Mylist_days = []
     Weekdays = ('Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье')
@@ -62,17 +67,14 @@ def get_schedule(group,type):
 
     for day in range(0,14):
         lesson = 0
-        #print(Mylist_days[day] + '\n' + Weekdays[day//2])
+        print(Mylist_days[day] + '\n' + Weekdays[day//2])
         temp = datetime.datetime.strptime(Mylist_days[day].strip(), "%d.%m.%Y")
-        if  datetime.datetime.now().day + 2 == temp.day:
+        if  datetime.datetime.now().day + 1 == temp.day:
             container += Mylist_days[day] + '\n' + Weekdays[day//2] + '\n'
             #print(temp)
             for lesson in range(0,7):
                 #print(Mylist[day][lesson][2] + " " + Mylist[day][lesson][3])
                 container += Mylist[day][lesson][2] + " " + Mylist[day][lesson][3] + '\n'
-                lesson += 1
-
-        day += 1
     #print(container)
     return container
 

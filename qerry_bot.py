@@ -8,34 +8,34 @@ list_links = json.load(open('documents/links.json','r',encoding='utf-8'))
 
 
 @bot.message_handler(commands=['start'])
-def Hello_message(message):
+def hello_message(message):
     #TODO need actual text
     bot.send_message(message.chat.id, "Приветствую, я неинтеллектуально обученная система по рассылке расписания \n Вы можете ввести название группы или часть от ФИО преподавателя "
                                       "и получить его расписание на сегодня (до 18 00) и на завтра (после 18 00)")
 
 @bot.message_handler(commands=['set_group'])
-def Add_user(message):
+def add_user(message):
     bot.send_message(message.chat.id, "Введите вашу группу, или Ваше имя, если вы являетесь преподавателем")
     #todo need to add user and his status
     pass
 
 @bot.message_handler(commands=['schedule'])
-def Add_user(message):
+def get_schedule_today(message):
     #todo
     pass
 
 @bot.message_handler(commands=['schedule_t'])
-def Add_user(message):
+def get_schedule_tommorow(message):
     #todo
     pass
 
 @bot.message_handler(commands=['schedule_w'])
-def Add_user(message):
+def get_schedule_week(message):
     #todo
     pass
 
 @bot.message_handler(commands=['distribution'])
-def Add_user(message):
+def set_distribution(message):
     #todo
     pass
 
