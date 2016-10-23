@@ -1,5 +1,5 @@
 class user:
-    group = 'user'
+    group = { 1: 'new'}
     status = 'free'
     id = 0
     choise = {}

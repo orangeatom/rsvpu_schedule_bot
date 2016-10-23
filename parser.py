@@ -5,8 +5,8 @@ import json
 import datetime
 import time
 
-library = {}
-schedule_site = 'http://www.rsvpu.ru/raspisanie-zanyatij-ochnoe-otdelenie/'
+
+schedule_url = 'http://www.rsvpu.ru/raspisanie-zanyatij-ochnoe-otdelenie/'
 
 def validate_option(opt):
     text = opt.text.lower()
@@ -25,14 +25,13 @@ def get_info(soup,text):
     return container
 
 def update_links():
-    site = requests.get(schedule_site)
+    dictionary = {}
+    site = requests.get(schedule_url)
     site.encoding = 'utf-8'
     Soup = BeautifulSoup(site.text, 'html.parser')
-    library['groups'] = get_info(Soup,'get_group')
-    library['lecturers'] = get_info(Soup,'fprep')
-    json.dump(library, open('documents/test.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=2)
-
-    json.dump(library, open('documents/links.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=2)
+    dictionary['groups'] = get_info(Soup,'get_group')
+    dictionary['lecturers'] = get_info(Soup,'fprep')
+    json.dump(dictionary, open('documents/links.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=2)
 
 #this function return all schedule
 def get_schedule(group,type,long):
@@ -43,12 +42,9 @@ def get_schedule(group,type,long):
     else:
         query_data = {'v_prep': list_group['lecturers'][group]}
 
-    rq = requests.get(schedule_site,  params = query_data).text
+    html_schedule = requests.get(schedule_url, params = query_data).text
+    bs = BeautifulSoup(html_schedule.encode('utf-8'), 'html.parser')
 
-
-    bs = BeautifulSoup(rq.encode('utf-8'), 'html.parser')
-
-    #print(time.time() - t1)
     Mylist = []
     Mylist_days = []
     Weekdays = ('Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье')
