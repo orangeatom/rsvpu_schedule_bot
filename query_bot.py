@@ -37,10 +37,10 @@ def set_distribution(message):
 def repeat_all_messages(message):
     bot.send_chat_action(message.chat.id,'typing')
     if (message.text.strip().lower() in list_links['groups']):
-        msg = get_schedule(message.text.strip().lower(),0,1)
+        msg = get_schedule_today(message.text.strip().lower(),0,1)
         bot.send_message(message.chat.id, msg)
     elif (message.text.strip().lower() in list_links['lecturers']):
-        msg = get_schedule(message.text.strip().lower(),1,1)
+        msg = get_schedule_today(message.text.strip().lower(),1,1)
         bot.send_message(message.chat.id, msg)
 
 if __name__ == '__main__':
