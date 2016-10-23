@@ -34,7 +34,7 @@ def update_links():
     json.dump(dictionary, open('documents/links.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=2)
 
 #this function return all schedule
-def get_schedule(group,type,long):
+def get_schedule(group,type,length):
     """this function return schedule to one day"""
     list_group = json.load(open('documents/links.json', 'r', encoding='utf-8'))
     if type == 0:
@@ -67,6 +67,6 @@ def get_schedule(group,type,long):
             container += Mylist_days[day] + '\n' + Weekdays[day//2] + '\n'
             for lesson in range(0,7):
                 container += Mylist[day][lesson][2] + " " + Mylist[day][lesson][3] + '\n'
-            days += 1
+
     return container
 
