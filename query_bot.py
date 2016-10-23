@@ -2,13 +2,9 @@ import config
 import telebot
 import json
 from parser import get_schedule
-import usr
 
 bot = telebot.TeleBot(config.token)
 list_links = json.load(open('documents/links.json','r',encoding='utf-8'))
-
-def check_id_of():
-    pass
 
 
 @bot.message_handler(commands=['start'])
@@ -21,7 +17,6 @@ def hello_message(message):
 def add_user(message):
     bot.send_message(message.chat.id, "Введите вашу группу, или Ваше имя, если вы являетесь преподавателем")
     #todo need to add user and his status
-
     pass
 
 @bot.message_handler(commands=['schedule'])
