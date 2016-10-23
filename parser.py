@@ -6,8 +6,6 @@ import datetime
 import time
 
 library = {}
-groups = {}
-lecturers = {}
 schedule_site = 'http://www.rsvpu.ru/raspisanie-zanyatij-ochnoe-otdelenie/'
 
 def validate_option(opt):
@@ -18,30 +16,22 @@ def validate_option(opt):
         return True
 
 
-def update_schedule_group(soup):
-    box = soup.find(id='get_group')
+def get_info(soup,text):
+    container = {}
+    box = soup.find(id=text)
     for opt in box.find_all('option'):
         if(validate_option(opt)):
-            print(opt.text)
-            groups[opt.text.lower()] = opt['value']
-
-
-def update_schedule_lecturer(soup):
-    box = soup.find(id='fprep')
-    for opt in box.find_all('option'):
-        if(validate_option(opt)):
-            print(opt.text)
-            lecturers[opt.text.lower()] = opt['value']
-
+            container[opt.text.lower()] = opt['value']
+    return container
 
 def update_links():
     site = requests.get(schedule_site)
     site.encoding = 'utf-8'
     Soup = BeautifulSoup(site.text, 'html.parser')
-    update_schedule_group(Soup)
-    update_schedule_lecturer(Soup)
-    library['groups'] = groups
-    library['lecturers'] = lecturers
+    library['groups'] = get_info(Soup,'get_group')
+    library['lecturers'] = get_info(Soup,'fprep')
+    json.dump(library, open('documents/test.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=2)
+
     json.dump(library, open('documents/links.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=2)
 
 #this function return all schedule
