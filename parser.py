@@ -3,52 +3,62 @@ import requests
 from bs4 import BeautifulSoup
 import json
 import datetime
+import time
 
 library = {}
 groups = {}
 lecturers = {}
 schedule_site = 'http://www.rsvpu.ru/raspisanie-zanyatij-ochnoe-otdelenie/'
 
-def update_schedule_group():
-    site = requests.get(schedule_site)
-    site.encoding = 'utf-8'
-    Soup = BeautifulSoup(site.text, 'html.parser')
-    box = Soup.find(id='get_group')
-    for opt in box.find_all('option'):
-        groups[opt.text.lower()] = opt['value']
+def validate_option(opt):
+    text = opt.text.lower()
+    if 'вакан' in text or 'выберите' in text:
+        return False
+    else:
+        return True
 
 
-def update_schedule_lecturer():
-    site = requests.get(schedule_site)
-    site.encoding = 'utf-8'
-    Soup = BeautifulSoup(site.text,'html.parser')
-    box = Soup.find(id='fprep')
+def update_schedule_group(soup):
+    box = soup.find(id='get_group')
     for opt in box.find_all('option'):
-        lecturers[opt.text.lower()] = opt['value']
+        if(validate_option(opt)):
+            print(opt.text)
+            groups[opt.text.lower()] = opt['value']
+
+
+def update_schedule_lecturer(soup):
+    box = soup.find(id='fprep')
+    for opt in box.find_all('option'):
+        if(validate_option(opt)):
+            print(opt.text)
+            lecturers[opt.text.lower()] = opt['value']
 
 
 def update_links():
-    update_schedule_group()
-    update_schedule_lecturer()
+    site = requests.get(schedule_site)
+    site.encoding = 'utf-8'
+    Soup = BeautifulSoup(site.text, 'html.parser')
+    update_schedule_group(Soup)
+    update_schedule_lecturer(Soup)
     library['groups'] = groups
     library['lecturers'] = lecturers
     json.dump(library, open('documents/links.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=2)
 
 #this function return all schedule
-def get_schedule(group,type):
+def get_schedule(group,type,long):
     """this function return schedule to one day"""
-    #not change
-    listgroup = json.load(open('documents/links.json', 'r', encoding='utf-8'))
+    list_group = json.load(open('documents/links.json', 'r', encoding='utf-8'))
     if type == 0:
-        query_data = {'v_gru': listgroup['groups'][group]}
+        query_data = {'v_gru': list_group['groups'][group]}
     else:
-        query_data = {'v_prep': listgroup['lecturers'][group]}
-    site = requests.get(schedule_site, params = query_data)
+        query_data = {'v_prep': list_group['lecturers'][group]}
 
-    site.encoding = 'utf-8'
-    bs = BeautifulSoup(site.text, 'html.parser')
-    #not change
+    rq = requests.get(schedule_site,  params = query_data).text
 
+
+    bs = BeautifulSoup(rq.encode('utf-8'), 'html.parser')
+
+    #print(time.time() - t1)
     Mylist = []
     Mylist_days = []
     Weekdays = ('Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье')
@@ -63,18 +73,14 @@ def get_schedule(group,type):
         temp = days.get_text().split('\n')
         Mylist_days.append(temp[1])
         Mylist_days.append(temp[2])
-    container = ""
 
+    container = ""
     for day in range(0,14):
-        lesson = 0
-        print(Mylist_days[day] + '\n' + Weekdays[day//2])
         temp = datetime.datetime.strptime(Mylist_days[day].strip(), "%d.%m.%Y")
         if  datetime.datetime.now().day + 1 == temp.day:
             container += Mylist_days[day] + '\n' + Weekdays[day//2] + '\n'
-            #print(temp)
             for lesson in range(0,7):
-                #print(Mylist[day][lesson][2] + " " + Mylist[day][lesson][3])
                 container += Mylist[day][lesson][2] + " " + Mylist[day][lesson][3] + '\n'
-    #print(container)
+            days += 1
     return container
 
