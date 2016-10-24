@@ -6,7 +6,8 @@ import datetime
 import time
 
 
-schedule_url = 'http://www.rsvpu.ru/raspisanie-zanyatij-ochnoe-otdelenie/'
+schedule_url_full_day = 'http://www.rsvpu.ru/raspisanie-zanyatij-ochnoe-otdelenie/'
+schedule_url_half_day = 'http://www.rsvpu.ru/racpisanie-zanyatij-zaochnoe-otdelenie/'
 Weekdays = ('Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье')
 
 def validate_option(opt):
@@ -27,7 +28,7 @@ def get_info(soup,text):
 
 def update_links():
     dictionary = {}
-    site = requests.get(schedule_url)
+    site = requests.get(schedule_url_full_day)
     site.encoding = 'utf-8'
     Soup = BeautifulSoup(site.text, 'html.parser')
     dictionary['groups'] = get_info(Soup,'get_group')
@@ -39,22 +40,24 @@ def update_links():
 #this function return all schedule
 def get_schedule(group,type):
     """this function return schedule to one day"""
-    list_group = json.load(open('links.json', 'r', encoding='utf-8'))
+    list_group = json.load(open('documents/links.json', 'r', encoding='utf-8'))
     if type == 0:
         query_data = {'v_gru': list_group['groups'][group]}
+        html_schedule = requests.get(schedule_url_full_day, params=query_data).text
     else:
         query_data = {'v_prep': list_group['lecturers'][group]}
-    html_schedule = requests.get(schedule_url, params = query_data).text
+        html_schedule = requests.get(schedule_url_half_day, params=query_data).text
+
     bs = BeautifulSoup(html_schedule.encode('utf-8'), 'html.parser')
 
-    subjects = []
+    sbj = []
     study_day = []
 
     for subjects in bs.find_all(class_='disciplina'):
         date = []
         for tag in subjects.find_all(class_='disciplina_cont'):
             date.append((tag.get_text()).split('\n'))
-        subjects.append(date)
+        sbj.append(date)
 
     for days in bs.find_all(class_ = 'day_date'):
         date = days.get_text().split('\n')
@@ -68,26 +71,30 @@ def get_schedule(group,type):
         container[list] = []
         #container += study_day[day] + '\n' + Weekdays[day//2] + '\n'
         for lesson in range(0,7):
-            container[list].append((subjects[day][lesson][2],subjects[day][lesson][3]))
+            container[list].append((sbj[day][lesson][2],sbj[day][lesson][3]))
             #container +=  + " " + subjects[day][lesson][3] + '\n'
     return container
 
-def get_schedule_day(group,type):
+def get_schedule_today(group, type):
     schedule = get_schedule(group,type)
     result = []
     for t in schedule.keys():
         if datetime.datetime.strptime(t,'%Y-%m-%d %H:%M:%S').day == datetime.date.today().day:
             result.append(schedule[t])
+            break
 
-def get_schedule_tomorrow(group,type):
+    return result
+
+def get_schedule_tomorrow(group, type):
     schedule = get_schedule(group, type)
     result = []
     for t in schedule.keys():
         if datetime.datetime.strptime(t, '%Y-%m-%d %H:%M:%S').day == datetime.date.today().day +1 :
             result.append(schedule[t])
+            break
     return result
 
-def get_schedule_week(group,type):
+def get_schedule_week(group, type):
     schedule = get_schedule(group, type)
     result = []
     for i in range(0,6):
