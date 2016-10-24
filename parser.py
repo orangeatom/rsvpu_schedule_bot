@@ -50,20 +50,20 @@ def get_schedule(group,type):
     subjects = []
     study_day = []
 
-    for link in bs.find_all(class_='disciplina'):
-        temp = []
-        for tag in link.find_all(class_='disciplina_cont'):
-            temp.append((tag.get_text()).split('\n'))
-        subjects.append(temp)
+    for subjects in bs.find_all(class_='disciplina'):
+        date = []
+        for tag in subjects.find_all(class_='disciplina_cont'):
+            date.append((tag.get_text()).split('\n'))
+        subjects.append(date)
 
     for days in bs.find_all(class_ = 'day_date'):
-        temp = days.get_text().split('\n')
-        study_day.append(temp[1])
-        study_day.append(temp[2])
+        date = days.get_text().split('\n')
+        study_day.append(date[1])
+        study_day.append(date[2])
 
     container = {}
     for day in range(0,14):
-        #temp = datetime.datetime.strptime(study_day[day].strip(), "%d.%m.%Y")
+        #date = datetime.datetime.strptime(study_day[day].strip(), "%d.%m.%Y")
         list = str(datetime.datetime.strptime(study_day[day].strip(),'%d.%m.%Y'))
         container[list] = []
         #container += study_day[day] + '\n' + Weekdays[day//2] + '\n'
@@ -71,23 +71,29 @@ def get_schedule(group,type):
             container[list].append((subjects[day][lesson][2],subjects[day][lesson][3]))
             #container +=  + " " + subjects[day][lesson][3] + '\n'
     return container
+
 def get_schedule_day(group,type):
     schedule = get_schedule(group,type)
+    result = []
     for t in schedule.keys():
         if datetime.datetime.strptime(t,'%Y-%m-%d %H:%M:%S').day == datetime.date.today().day:
-            print(schedule[t])
-
+            result.append(schedule[t])
 
 def get_schedule_tomorrow(group,type):
     schedule = get_schedule(group, type)
+    result = []
     for t in schedule.keys():
         if datetime.datetime.strptime(t, '%Y-%m-%d %H:%M:%S').day == datetime.date.today().day +1 :
-            print(schedule[t])
+            result.append(schedule[t])
+    return result
 
 def get_schedule_week(group,type):
     schedule = get_schedule(group, type)
+    result = []
     for i in range(0,6):
         for t in schedule.keys():
             if datetime.datetime.strptime(t, '%Y-%m-%d %H:%M:%S').day == datetime.date.today().day + i:
-                print(schedule[t])
+                result.append(schedule[t])
+    return result
+
 
