@@ -2,9 +2,12 @@ import config
 import telebot
 import json
 import parser
-import usr
 import datetime
 from peewee import *
+
+user_base = SqliteDatabase('documents/users.db')
+
+
 
 bot = telebot.TeleBot(config.token)
 queries = json.load(open('documents/links.json', 'r', encoding='utf-8'))
@@ -12,11 +15,11 @@ bd = SqliteDatabase('users.db')
 Weekdays = ('Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье')
 
 
-user = {}
-class usr:
-    id = 0
-    status = 0
-    options = []
+class User(Model):
+    id = CharField(unique=True)
+    status = IntegerField(null=True)
+    class Meta:
+        database = user_base
 
 class state:
     null = 0
@@ -80,6 +83,9 @@ def repeat_all_messages(message):
 
 
 if __name__ == '__main__':
+    user_base.connect()
+    user_base.create_table()
+    user_base.close()
     bot.polling(none_stop=True)
 
 

@@ -49,7 +49,6 @@ def get_schedule(group,type):
         html_schedule = requests.get(schedule_url_half_day, params=query_data).text
 
     bs = BeautifulSoup(html_schedule.encode('utf-8'), 'html.parser')
-
     sbj = []
     study_day = []
 
