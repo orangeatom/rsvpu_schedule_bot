@@ -35,7 +35,6 @@ def update_links():
     dictionary['lecturers'] = get_info(Soup,'fprep')
     json.dump(dictionary, open('documents/links.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=2)
 
-#this function return all schedule
 
 #this function return all schedule
 def get_schedule(group,type):

@@ -6,10 +6,8 @@ import datetime
 from peewee import *
 
 user_base = SqliteDatabase('documents/users.db')
-
 bot = telebot.TeleBot(config.token)
 queries = json.load(open('documents/links.json', 'r', encoding='utf-8'))
-
 Weekdays = ('Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье')
 
 class state:
@@ -19,7 +17,6 @@ class state:
     select = 3
     waiting_group = 4
     waiting_lecturer = 5
-    pass
 
 class User(Model):
     User_id = CharField(unique=True)
@@ -34,8 +31,7 @@ class User(Model):
 
 
 def search():
-    pass
-
+    """this function return some values to add this into custom keyboard when user enter text with more than one math in list"""
 
 @bot.message_handler(commands=['start'])
 def hello_message(message):
@@ -46,11 +42,11 @@ def hello_message(message):
 
 @bot.message_handler(commands=['set_group'])
 def add_user(message):
+    """this handler set user state to select, and send him custom keyboard"""
     bot.send_chat_action(message.chat.id, 'typing')
     usr = User.get_or_create(User_id=message.chat.id)
     usr[0].State = state.select
     usr[0].save()
-    print(usr[0].State)
     markup = telebot.types.ReplyKeyboardMarkup()
     markup.row('Группа')
     markup.row('Преподаватель')
@@ -64,30 +60,27 @@ def send_schedule_today(message):
         try:
             text = '{0} \n{1}\n'.format(Weekdays[datetime.date.today().weekday()], datetime.date.today())
             msg = parser.get_schedule_today(usr[0].Group_id, 0)
-            for lection in range(0, 7):
-                text += '{0} {1}\n'.format(msg[0][lection][0], msg[0][lection][1])
+            for lecture in range(0, 7):
+                text += '{0} {1}\n'.format(msg[0][lecture][0], msg[0][lecture][1])
                 print('1')
             bot.send_message(message.chat.id, text)
         except:
-            bot.send_message(usr.User_id, 'Извините, в данный момент я не могу этого сделать.')
-            pass
-        pass
+            bot.send_message(usr[0].User_id, 'Извините, в данный момент я не могу этого сделать.')
     elif usr[0].State == state.lecturer:
         try:
             print('1')
             text = '{0} \n{1}\n'.format(Weekdays[datetime.date.today().weekday()], datetime.date.today())
             print('1')
             msg = parser.get_schedule_today(usr[0].Lecturer_id, 1)
-            for lection in range(0, 7):
-                text += '{0} {1}\n'.format(msg[0][lection][0], msg[0][lection][1])
+            for lecture in range(0, 7):
+                text += '{0} {1}\n'.format(msg[0][lecture][0], msg[0][lecture][1])
             bot.send_message(message.chat.id, text)
         except:
             bot.send_message(usr[0].User_id, 'Извините, в данный момент я не могу этого сделать.')
     else:
         bot.send_message(usr[0].User_id, 'Выберите группу или преподавателя для действия этой команды')
-    pass
 
-@bot.message_handler(commands=['cansel'])
+@bot.message_handler(commands=['canсel'])
 
 @bot.message_handler(commands=['schedule_t'])
 def send_schedule_tomorrow(message):
@@ -98,28 +91,22 @@ def send_schedule_tomorrow(message):
             dt = datetime.date.today()
             text = '{0} \n{1}\n'.format(Weekdays[datetime.date.today().weekday()], datetime.date.today())
             msg = parser.get_schedule_tomorrow(usr[0].Group_id, 0)
-            for lection in range(0, 7):
-                text += '{0} {1}\n'.format(msg[0][lection][0], msg[0][lection][1])
-                print('1')
+            for lecture in range(0, 7):
+                text += '{0} {1}\n'.format(msg[0][lecture][0], msg[0][lecture][1])
             bot.send_message(message.chat.id, text)
         except:
             bot.send_message(usr[0].User_id, 'Извините, в данный момент я не могу этого сделать.')
-            pass
-        pass
     elif usr[0].State == state.lecturer:
         try:
-            print('1')
             text = '{0} \n{1}\n'.format(Weekdays[datetime.date.today().weekday()], datetime.date.today())
-            print('1')
             msg = parser.get_schedule_tomorrow(usr[0].Lecturer_id, 1)
-            for lection in range(0, 7):
-                text += '{0} {1}\n'.format(msg[0][lection][0], msg[0][lection][1])
+            for lecture in range(0, 7):
+                text += '{0} {1}\n'.format(msg[0][lecture][0], msg[0][lecture][1])
             bot.send_message(message.chat.id, text)
         except:
             bot.send_message(usr[0].User_id, 'Извините, в данный момент я не могу этого сделать.')
     else:
         bot.send_message(usr[0].User_id, 'Выберите группу или преподавателя для действия этой команды')
-    pass
 
 @bot.message_handler(commands=['schedule_w'])
 def send_schedule_week(message):
@@ -132,13 +119,12 @@ def send_schedule_week(message):
             for days in range(0,7):
                 text = '{0} \n{1}\n'.format(Weekdays[dt.weekday()], dt)
                 dt += datetime.timedelta(days=1)
-                for lection in range(0, 7):
-                    text += '{0} {1}\n'.format(msg[days][lection][0], msg[days][lection][1])
+                for lecture in range(0, 7):
+                    text += '{0} {1}\n'.format(msg[days][lecture][0], msg[days][lecture][1])
                 bot.send_message(message.chat.id, text)
         except:
             bot.send_message(usr[0].User_id, 'Извините, в данный момент я не могу этого сделать.')
-            pass
-        pass
+
     elif usr[0].State == state.lecturer:
         try:
             msg = parser.get_schedule_week(usr[0].Lecturer_id, 0)
@@ -146,13 +132,12 @@ def send_schedule_week(message):
             for days in range(0,7):
                 text = '{0} \n{1}\n'.format(Weekdays[dt.weekday()], dt)
                 dt += datetime.timedelta(days=1)
-                for lection in range(0, 7):
-                    text += '{0} {1}\n'.format(msg[days][lection][0], msg[days][lection][1])
+                for lecture in range(0, 7):
+                    text += '{0} {1}\n'.format(msg[days][lecture][0], msg[days][lecture][1])
                 bot.send_message(message.chat.id, text)
         except:
             bot.send_message(usr[0].User_id, 'Извините, в данный момент я не могу этого сделать.')
-            pass
-        pass
+
     else:
         bot.send_message(usr[0].User_id, 'Выберите группу или преподавателя для действия этой команды')
     pass
