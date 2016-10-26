@@ -42,13 +42,14 @@ def get_schedule(group,type):
     """this function return schedule to one day"""
     list_group = json.load(open('documents/links.json', 'r', encoding='utf-8'))
     if type == 0:
-        query_data = {'v_gru': list_group['groups'][group]}
+        query_data = {'v_gru': group}
         html_schedule = requests.get(schedule_url_full_day, params=query_data).text
     else:
-        query_data = {'v_prep': list_group['lecturers'][group]}
+        query_data = {'v_prep': group}
         html_schedule = requests.get(schedule_url_half_day, params=query_data).text
 
     bs = BeautifulSoup(html_schedule.encode('utf-8'), 'html.parser')
+
     sbj = []
     study_day = []
 
@@ -88,7 +89,7 @@ def get_schedule_tomorrow(group, type):
     schedule = get_schedule(group, type)
     result = []
     for t in schedule.keys():
-        if datetime.datetime.strptime(t, '%Y-%m-%d %H:%M:%S').day == datetime.date.today().day +1 :
+        if datetime.datetime.strptime(t, '%Y-%m-%d %H:%M:%S').day == datetime.date.today().day + 1:
             result.append(schedule[t])
             break
     return result
@@ -96,9 +97,10 @@ def get_schedule_tomorrow(group, type):
 def get_schedule_week(group, type):
     schedule = get_schedule(group, type)
     result = []
-    for i in range(0,6):
+    for i in range(0,7):
+        diff = datetime.date.today() + datetime.timedelta(days=i)
         for t in schedule.keys():
-            if datetime.datetime.strptime(t, '%Y-%m-%d %H:%M:%S').day == datetime.date.today().day + i:
+            if datetime.datetime.strptime(t, '%Y-%m-%d %H:%M:%S').day == diff.day:
                 result.append(schedule[t])
     return result
 
