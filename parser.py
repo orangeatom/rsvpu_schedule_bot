@@ -66,13 +66,10 @@ def get_schedule(group,type):
 
     container = {}
     for day in range(0,14):
-        #date = datetime.datetime.strptime(study_day[day].strip(), "%d.%m.%Y")
         list = str(datetime.datetime.strptime(study_day[day].strip(),'%d.%m.%Y'))
         container[list] = []
-        #container += study_day[day] + '\n' + Weekdays[day//2] + '\n'
         for lesson in range(0,7):
             container[list].append((sbj[day][lesson][2],sbj[day][lesson][3]))
-            #container +=  + " " + subjects[day][lesson][3] + '\n'
     return container
 
 def get_schedule_today(group, type):

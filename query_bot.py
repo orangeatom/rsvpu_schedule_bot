@@ -65,7 +65,6 @@ def send_schedule_today(message):
             text = '{0} \n{1}\n'.format(Weekdays[datetime.date.today().weekday()], datetime.date.today())
             msg = parser.get_schedule_today(usr[0].Group_id, 0)
             for lection in range(0, 7):
-                # print(msg[0][lection][0] + " " + msg[0][lection][1])
                 text += '{0} {1}\n'.format(msg[0][lection][0], msg[0][lection][1])
                 print('1')
             bot.send_message(message.chat.id, text)
@@ -80,14 +79,12 @@ def send_schedule_today(message):
             print('1')
             msg = parser.get_schedule_today(usr[0].Lecturer_id, 1)
             for lection in range(0, 7):
-                # print(msg[0][lection][0] + " " + msg[0][lection][1])
                 text += '{0} {1}\n'.format(msg[0][lection][0], msg[0][lection][1])
             bot.send_message(message.chat.id, text)
         except:
             bot.send_message(usr[0].User_id, 'Извините, в данный момент я не могу этого сделать.')
     else:
         bot.send_message(usr[0].User_id, 'Выберите группу или преподавателя для действия этой команды')
-    #bot.send_message(message.chat.id, msg)
     pass
 
 @bot.message_handler(commands=['cansel'])
@@ -102,7 +99,6 @@ def send_schedule_tomorrow(message):
             text = '{0} \n{1}\n'.format(Weekdays[datetime.date.today().weekday()], datetime.date.today())
             msg = parser.get_schedule_tomorrow(usr[0].Group_id, 0)
             for lection in range(0, 7):
-                # print(msg[0][lection][0] + " " + msg[0][lection][1])
                 text += '{0} {1}\n'.format(msg[0][lection][0], msg[0][lection][1])
                 print('1')
             bot.send_message(message.chat.id, text)
@@ -117,14 +113,12 @@ def send_schedule_tomorrow(message):
             print('1')
             msg = parser.get_schedule_tomorrow(usr[0].Lecturer_id, 1)
             for lection in range(0, 7):
-                # print(msg[0][lection][0] + " " + msg[0][lection][1])
                 text += '{0} {1}\n'.format(msg[0][lection][0], msg[0][lection][1])
             bot.send_message(message.chat.id, text)
         except:
             bot.send_message(usr[0].User_id, 'Извините, в данный момент я не могу этого сделать.')
     else:
         bot.send_message(usr[0].User_id, 'Выберите группу или преподавателя для действия этой команды')
-    # bot.send_message(message.chat.id, msg)
     pass
 
 @bot.message_handler(commands=['schedule_w'])
@@ -139,7 +133,6 @@ def send_schedule_week(message):
                 text = '{0} \n{1}\n'.format(Weekdays[dt.weekday()], dt)
                 dt += datetime.timedelta(days=1)
                 for lection in range(0, 7):
-                    # print(msg[0][lection][0] + " " + msg[0][lection][1])
                     text += '{0} {1}\n'.format(msg[days][lection][0], msg[days][lection][1])
                 bot.send_message(message.chat.id, text)
         except:
@@ -154,7 +147,6 @@ def send_schedule_week(message):
                 text = '{0} \n{1}\n'.format(Weekdays[dt.weekday()], dt)
                 dt += datetime.timedelta(days=1)
                 for lection in range(0, 7):
-                    # print(msg[0][lection][0] + " " + msg[0][lection][1])
                     text += '{0} {1}\n'.format(msg[days][lection][0], msg[days][lection][1])
                 bot.send_message(message.chat.id, text)
         except:
@@ -163,7 +155,6 @@ def send_schedule_week(message):
         pass
     else:
         bot.send_message(usr[0].User_id, 'Выберите группу или преподавателя для действия этой команды')
-    # bot.send_message(message.chat.id, msg)
     pass
 
 @bot.message_handler(commands=['distribution'])
@@ -174,7 +165,6 @@ def set_distribution(message):
 @bot.message_handler(content_types=["text"])
 def repeat_all_messages(message):
     bot.send_chat_action(message.chat.id,'typing')
-    #print(User.select().where(User.Id == message.chat.id and User.State == state.select))
     user = User.get(User.User_id == message.chat.id)
     if user.State == state.select:
         if message.text == 'Группа':
@@ -215,7 +205,6 @@ def repeat_all_messages(message):
                 text = '{0} \n{1}\n'.format(Weekdays[datetime.date.today().weekday()], datetime.date.today())
                 msg = parser.get_schedule_today(message.text.strip().lower(), 0)
                 for lection in range(0,7):
-                    #print(msg[0][lection][0] + " " + msg[0][lection][1])
                     text += '{0} {1}\n'.format(msg[0][lection][0] , msg[0][lection][1])
                 bot.send_message(message.chat.id, text)
             except:
@@ -225,7 +214,6 @@ def repeat_all_messages(message):
                 text = '{0} \n{1}\n'.format(Weekdays[datetime.date.today().weekday()], datetime.date.today())
                 msg = parser.get_schedule_today(message.text.strip().lower(), 1)
                 for lection in range(0,7):
-                    #print(msg[0][lection][0] + " " + msg[0][lection][1])
                     text += '{0} {1}\n'.format(msg[0][lection][0] , msg[0][lection][1])
                 bot.send_message(message.chat.id, text)
             except:
