@@ -6,6 +6,7 @@ import datetime
 import time
 
 
+
 schedule_url_full_day = 'http://www.rsvpu.ru/raspisanie-zanyatij-ochnoe-otdelenie/'
 schedule_url_half_day = 'http://www.rsvpu.ru/racpisanie-zanyatij-zaochnoe-otdelenie/'
 Weekdays = ('Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье')
@@ -33,7 +34,8 @@ def update_links():
     Soup = BeautifulSoup(site.text, 'html.parser')
     dictionary['groups'] = get_info(Soup,'get_group')
     dictionary['lecturers'] = get_info(Soup,'fprep')
-    json.dump(dictionary, open('documents/links.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=2)
+    #json.dump(dictionary, open('documents/links.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=2)
+    return dictionary
 
 
 #this function return all schedule
