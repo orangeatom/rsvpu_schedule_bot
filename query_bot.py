@@ -1,6 +1,5 @@
 import config
 import telebot
-import json
 import parser
 import datetime
 import locale
@@ -8,7 +7,6 @@ from peewee import *
 
 DB = SqliteDatabase('documents/users.db')
 bot = telebot.TeleBot(config.token)
-queries = json.load(open('documents/links.json', 'r', encoding='utf-8'))
 Weekdays = ('🌕 *Понедельник*', '🌖 *Вторник*', '🌗 *Среда*', '🌘 *Четверг*', '🌑 *Пятница*', '🌒 *Суббота*', '🌓 *Воскресенье*')
 
 class state:
@@ -183,8 +181,8 @@ def repeat_all_messages(message):
             bot.send_message(user.User_id, 'Выберите элемент из списка')
 
     elif user.State == state.waiting_group:
-        if message.text.strip().lower() in queries['groups']:
-            user.Group_id = queries['groups'][message.text.strip().lower()]
+        if Group.select().where(Group.group_name == message.text.strip().split()):
+            user.Group_id = Group.select().where(Group.group_name == message.text.strip().split()).get().group_id
             user.State = state.gpoup
             user.save()
             bot.send_message(message.chat.id, 'Отлично, теперь вы можете получать расписание вашей группы {0} по запросу'.format(message.text), reply_markup=hide_markup)
@@ -199,8 +197,8 @@ def repeat_all_messages(message):
                 bot.send_message(message.chat.id, "Я ничего не смог найти...")
 
     elif user.State == state.waiting_lecturer:
-        if message.text.strip().lower() in queries['lecturers']:
-            user.Lecturer_id = queries['lecturers'][message.text.strip().lower()]
+        if Teacher.select().where(Teacher.teacher_name == message.text.strip().split()):
+            user.Lecturer_id = Teacher.select().where(Teacher.teacher_name == message.text.strip().split()).get().teacher_id
             user.State = state.lecturer
             user.save()
             bot.send_message(message.chat.id, 'Отлично, теперь вы можете получать ваше расписание по запросу'.format(message.text), reply_markup=hide_markup)
@@ -215,7 +213,7 @@ def repeat_all_messages(message):
                 bot.send_message(message.chat.id, "Извините, я ничего не смог найти. Попробуйте заного.",reply_markup=hide_markup)
 
     elif user.State != state.select:
-        if (message.text.strip().lower() in queries['groups']):
+        if Group.select().where(Group.group_name == message.text.strip().split()):
             try:
                 id = Group.select().where(Group.group_name == message.text.strip().lower())
                 text = format_day(parser.get_schedule_today(id[0].group_id.strip().lower(), 0), datetime.date.today(), 0)
@@ -223,7 +221,7 @@ def repeat_all_messages(message):
             except:
                 bot.send_message(message.chat.id, "Возникла ошибка ")
 
-        elif (message.text.strip().lower() in queries['lecturers']):
+        elif Teacher.select().where(Teacher.teacher_name == message.text.strip().split()):
             try:
                 id = Teacher.select().where(Teacher.teacher_name == message.text.strip().lower())
                 text = format_day(parser.get_schedule_today(id[0].teacher_id, 1), datetime.date.today(), 0)
@@ -248,6 +246,7 @@ def repeat_all_messages(message):
                     text = format_day(parser.get_schedule_today(id[0].teacher_id,1),datetime.date.today(),0)
                     markup_hide = telebot.types.ReplyKeyboardHide()
                     bot.send_message(message.chat.id, text,reply_markup=markup_hide, parse_mode='MARKDOWN')
+
 
 
 if __name__ == '__main__':
