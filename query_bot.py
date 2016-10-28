@@ -142,7 +142,7 @@ def send_schedule_week(message):
             for days in range(0,7):
                 text = format_day(msg,dt,days)
                 dt += datetime.timedelta(days=1)
-                bot.send_message(message.chat.id, text, disable_notification=True, parse_mode='Markdown')
+                bot.send_message(message.chat.id, text, disable_notification=True, parse_mode='Markdown',disable_web_page_preview=True)
         except:
             bot.send_message(usr[0].User_id, 'Извините, в данный момент я не могу этого сделать.')
 
