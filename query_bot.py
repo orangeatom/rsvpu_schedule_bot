@@ -108,7 +108,7 @@ def send_schedule_today(message):
     else:
         bot.send_message(usr[0].User_id, 'Выберите группу или преподавателя для действия этой команды')
 
-@bot.message_handler(commands=['canсel'])
+@bot.message_handler(commands=['cancel'])
 
 @bot.message_handler(commands=['schedule_t'])
 def send_schedule_tomorrow(message):
@@ -181,8 +181,8 @@ def repeat_all_messages(message):
             bot.send_message(user.User_id, 'Выберите элемент из списка')
 
     elif user.State == state.waiting_group:
-        if Group.select().where(Group.group_name == message.text.strip().split()):
-            user.Group_id = Group.select().where(Group.group_name == message.text.strip().split()).get().group_id
+        if Group.select().where(Group.group_name == message.text.strip().lower()).exists():
+            user.Group_id = Group.select().where(Group.group_name == message.text.strip().lower()).get().group_id
             user.State = state.gpoup
             user.save()
             bot.send_message(message.chat.id, 'Отлично, теперь вы можете получать расписание вашей группы {0} по запросу'.format(message.text), reply_markup=hide_markup)
@@ -197,8 +197,8 @@ def repeat_all_messages(message):
                 bot.send_message(message.chat.id, "Я ничего не смог найти...")
 
     elif user.State == state.waiting_lecturer:
-        if Teacher.select().where(Teacher.teacher_name == message.text.strip().split()):
-            user.Lecturer_id = Teacher.select().where(Teacher.teacher_name == message.text.strip().split()).get().teacher_id
+        if Teacher.select().where(Teacher.teacher_name == message.text.strip().lower()).exists():
+            user.Lecturer_id = Teacher.select().where(Teacher.teacher_name == message.text.strip().lower()).get().teacher_id
             user.State = state.lecturer
             user.save()
             bot.send_message(message.chat.id, 'Отлично, теперь вы можете получать ваше расписание по запросу'.format(message.text), reply_markup=hide_markup)
@@ -213,7 +213,7 @@ def repeat_all_messages(message):
                 bot.send_message(message.chat.id, "Извините, я ничего не смог найти. Попробуйте заного.",reply_markup=hide_markup)
 
     elif user.State != state.select:
-        if Group.select().where(Group.group_name == message.text.strip().split()):
+        if Group.select().where(Group.group_name == message.text.strip().lower()).exists():
             try:
                 id = Group.select().where(Group.group_name == message.text.strip().lower())
                 text = format_day(parser.get_schedule_today(id[0].group_id.strip().lower(), 0), datetime.date.today(), 0)
@@ -221,7 +221,7 @@ def repeat_all_messages(message):
             except:
                 bot.send_message(message.chat.id, "Возникла ошибка ")
 
-        elif Teacher.select().where(Teacher.teacher_name == message.text.strip().split()):
+        elif Teacher.select().where(Teacher.teacher_name == message.text.strip().lower()).exists():
             try:
                 id = Teacher.select().where(Teacher.teacher_name == message.text.strip().lower())
                 text = format_day(parser.get_schedule_today(id[0].teacher_id, 1), datetime.date.today(), 0)
@@ -246,7 +246,6 @@ def repeat_all_messages(message):
                     text = format_day(parser.get_schedule_today(id[0].teacher_id,1),datetime.date.today(),0)
                     markup_hide = telebot.types.ReplyKeyboardHide()
                     bot.send_message(message.chat.id, text,reply_markup=markup_hide, parse_mode='MARKDOWN')
-
 
 
 if __name__ == '__main__':
