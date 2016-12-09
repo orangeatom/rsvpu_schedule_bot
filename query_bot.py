@@ -18,12 +18,13 @@ class state:
     waiting_lecturer = 5
 
 class User(Model):
-    User_id = CharField(unique=True)
+    user_id = CharField(unique=True)
     State = IntegerField(null=True)
     # this data need to query to schedule
     Group_id = CharField(null=True)
     Lecturer_id = CharField(null=True)
     Distribution = IntegerField(null=True)
+    #request_data = CharField(null=True)
     class Meta:
         database = DB
 
@@ -52,12 +53,12 @@ def search(str, type = 0):
     """return some values to add this into custom keyboard when user enter text with more than one math in list"""
     choice = []
     if type != 2:
-        for teacher in Teacher.select().where(Teacher.teacher_name.contains(str)):
+        for teacher in Teacher.select().where(Teacher.teacher_name.contains(str)).order_by():
             choice.append(teacher.teacher_name)
             print(teacher.teacher_name)
     choice.sort()
     if type != 1:
-        for group in Group.select().where(Group.group_name.contains(str)):
+        for group in Group.select().where(Group.group_name.contains(str)).order_by():
             choice.append(group.group_name)
             print(group.group_name)
     return choice
@@ -71,7 +72,7 @@ def format_day(container,day,count):
 
 @bot.message_handler(commands=['start'])
 def hello_message(message):
-    usr = User.create_or_get(User_id = message.chat.id, State = state.null)
+    usr = User.create_or_get(user_id = message.chat.id, State = state.null)
     bot.send_chat_action(message.chat.id, 'typing')
     bot.send_message(message.chat.id, "Приветствую, я неинтеллектуально обученная система по рассылке расписания \n Вы можете ввести название группы или часть от ФИО преподавателя "
                                       "и получить его расписание на сегодня (до 18 00) и на завтра (после 18 00)")
@@ -80,7 +81,7 @@ def hello_message(message):
 def add_user(message):
     """this handler set user state to select, and send him custom keyboard"""
     bot.send_chat_action(message.chat.id, 'typing')
-    usr = User.get_or_create(User_id=message.chat.id)
+    usr = User.get_or_create(user_id=message.chat.id)
     usr[0].State = state.select
     usr[0].save()
     markup = telebot.types.ReplyKeyboardMarkup()
@@ -91,50 +92,50 @@ def add_user(message):
 @bot.message_handler(commands=['schedule'])
 def send_schedule_today(message):
     bot.send_chat_action(message.chat.id,'typing')
-    usr = User.get_or_create(User_id=message.chat.id)
+    usr = User.get_or_create(user_id=message.chat.id)
     if usr[0].State == state.gpoup:
         try:
             text = format_day(parser.get_schedule_today(usr[0].Group_id,0),datetime.date.today(),0)
             bot.send_message(message.chat.id, text,parse_mode='Markdown')
         except:
-            bot.send_message(usr[0].User_id, 'Извините, в данный момент я не могу этого сделать.')
+            bot.send_message(usr[0].user_id, 'Извините, в данный момент я не могу этого сделать.')
 
     elif usr[0].State == state.lecturer:
         try:
             text = format_day(parser.get_schedule_today(usr[0].Lecturer_id,1),datetime.date.today(),0)
             bot.send_message(message.chat.id, text ,parse_mode='Markdown')
         except:
-            bot.send_message(usr[0].User_id, 'Извините, в данный момент я не могу этого сделать.')
+            bot.send_message(usr[0].user_id, 'Извините, в данный момент я не могу этого сделать.')
     else:
-        bot.send_message(usr[0].User_id, 'Выберите группу или преподавателя для действия этой команды')
+        bot.send_message(usr[0].user_id, 'Выберите группу или преподавателя для действия этой команды')
 
 @bot.message_handler(commands=['cancel'])
 
 @bot.message_handler(commands=['schedule_t'])
 def send_schedule_tomorrow(message):
     bot.send_chat_action(message.chat.id, 'typing')
-    usr = User.get_or_create(User_id=message.chat.id)
+    usr = User.get_or_create(user_id=message.chat.id)
     dt = datetime.date.today() + datetime.timedelta(days=1)
     if usr[0].State == state.gpoup:
         try:
             text = format_day(parser.get_schedule_tomorrow(usr[0].Group_id,0),dt,0)
             bot.send_message(message.chat.id, text, parse_mode='Markdown')
         except:
-            bot.send_message(usr[0].User_id, 'Извините, в данный момент я не могу этого сделать.')
+            bot.send_message(usr[0].user_id, 'Извините, в данный момент я не могу этого сделать.')
 
     elif usr[0].State == state.lecturer:
         try:
             text = format_day(parser.get_schedule_tomorrow(usr[0].Lecturer_id,1),dt,0)
             bot.send_message(message.chat.id, text, parse_mode='Markdown')
         except:
-            bot.send_message(usr[0].User_id, 'Извините, в данный момент я не могу этого сделать.')
+            bot.send_message(usr[0].user_id, 'Извините, в данный момент я не могу этого сделать.')
     else:
-        bot.send_message(usr[0].User_id, 'Выберите группу или преподавателя для действия этой команды')
+        bot.send_message(usr[0].user_id, 'Выберите группу или преподавателя для действия этой команды')
 
 @bot.message_handler(commands=['schedule_w'])
 def send_schedule_week(message):
     bot.send_chat_action(message.chat.id, 'typing')
-    usr = User.get_or_create(User_id=message.chat.id)
+    usr = User.get_or_create(user_id=message.chat.id)
     dt = datetime.date.today()
     if usr[0].State == state.gpoup:
         try:
@@ -144,7 +145,7 @@ def send_schedule_week(message):
                 dt += datetime.timedelta(days=1)
                 bot.send_message(message.chat.id, text, disable_notification=True, parse_mode='Markdown',disable_web_page_preview=True)
         except:
-            bot.send_message(usr[0].User_id, 'Извините, в данный момент я не могу этого сделать.')
+            bot.send_message(usr[0].user_id, 'Извините, в данный момент я не могу этого сделать.')
 
     elif usr[0].State == state.lecturer:
         try:
@@ -154,10 +155,10 @@ def send_schedule_week(message):
                 dt += datetime.timedelta(days=1)
                 bot.send_message(message.chat.id, text,disable_notification=True, parse_mode='Markdown')
         except:
-            bot.send_message(usr[0].User_id, 'Извините, в данный момент я не могу этого сделать.')
+            bot.send_message(usr[0].user_id, 'Извините, в данный момент я не могу этого сделать.')
 
     else:
-        bot.send_message(usr[0].User_id, 'Выберите группу или преподавателя для действия этой команды')
+        bot.send_message(usr[0].user_id, 'Выберите группу или преподавателя для действия этой команды')
 
 @bot.message_handler(commands=['distribution'])
 def set_distribution(message):
@@ -166,19 +167,20 @@ def set_distribution(message):
 @bot.message_handler(content_types=["text"])
 def repeat_all_messages(message):
     bot.send_chat_action(message.chat.id,'typing')
-    user = User.get(User.User_id == message.chat.id)
+    user = User.get(User.user_id == message.chat.id)
     hide_markup = telebot.types.ReplyKeyboardHide()
+
     if user.State == state.select:
         if message.text == 'Группа':
             user.State = state.waiting_group
             user.save()
-            bot.send_message(user.User_id, 'Введите название группы: ', reply_markup=hide_markup)
+            bot.send_message(user.user_id, 'Введите название группы: ', reply_markup=hide_markup)
         elif message.text == 'Преподаватель':
             user.State = state.waiting_lecturer
             user.save()
-            bot.send_message(user.User_id, 'Введите имя преподавателя: ', reply_markup=hide_markup)
+            bot.send_message(user.user_id, 'Введите имя преподавателя: ', reply_markup=hide_markup)
         else:
-            bot.send_message(user.User_id, 'Выберите элемент из списка')
+            bot.send_message(user.user_id, 'Выберите элемент из списка')
 
     elif user.State == state.waiting_group:
         if Group.select().where(Group.group_name == message.text.strip().lower()).exists():
@@ -248,6 +250,7 @@ def repeat_all_messages(message):
                     bot.send_message(message.chat.id, text,reply_markup=markup_hide, parse_mode='MARKDOWN')
 
 
+locale.setlocale(locale.LC_ALL, ('RU', 'UTF8'))
+
 if __name__ == '__main__':
-    locale.setlocale(locale.LC_ALL, ('RU', 'UTF8'))
     bot.polling(none_stop=True)

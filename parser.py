@@ -1,15 +1,10 @@
 #!/usr/bin/env python3
 import requests
 from bs4 import BeautifulSoup
-import json
 import datetime
-import time
-
-
 
 schedule_url_full_day = 'http://www.rsvpu.ru/raspisanie-zanyatij-ochnoe-otdelenie/'
 schedule_url_half_day = 'http://www.rsvpu.ru/racpisanie-zanyatij-zaochnoe-otdelenie/'
-Weekdays = ('Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье')
 
 def validate_option(opt):
     text = opt.text.lower()
@@ -18,13 +13,12 @@ def validate_option(opt):
     else:
         return True
 
-
 def get_info(soup,text):
     container = {}
     box = soup.find(id=text)
     for opt in box.find_all('option'):
         if(validate_option(opt)):
-            container[opt.text.lower()] = opt['value']
+            container[opt.text] = opt['value']
     return container
 
 def update_links():
@@ -32,27 +26,23 @@ def update_links():
     site = requests.get(schedule_url_full_day)
     site.encoding = 'utf-8'
     Soup = BeautifulSoup(site.text, 'html.parser')
-    dictionary['groups'] = get_info(Soup,'get_group')
-    dictionary['lecturers'] = get_info(Soup,'fprep')
-    #json.dump(dictionary, open('documents/links.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=2)
+    dictionary['groups'] = get_info(Soup, 'get_group')
+    dictionary['teachers'] = get_info(Soup, 'fprep')
     return dictionary
-
 
 #this function return all schedule
 def get_schedule(group,type):
     """this function return schedule to one day"""
-    list_group = json.load(open('documents/links.json', 'r', encoding='utf-8'))
+    sbj = []
+    study_day = []
+    #list_group = json.load(open('documents/links.json', 'r', encoding='utf-8'))
     if type == 0:
         query_data = {'v_gru': group}
         html_schedule = requests.get(schedule_url_full_day, params=query_data).text
     else:
         query_data = {'v_prep': group}
         html_schedule = requests.get(schedule_url_half_day, params=query_data).text
-
     bs = BeautifulSoup(html_schedule.encode('utf-8'), 'html.parser')
-
-    sbj = []
-    study_day = []
 
     for subjects in bs.find_all(class_='disciplina'):
         date = []
@@ -77,10 +67,9 @@ def get_schedule_today(group, type):
     schedule = get_schedule(group,type)
     result = []
     for t in schedule.keys():
-        if datetime.datetime.strptime(t,'%Y-%m-%d %H:%M:%S').day == datetime.date.today().day:
+        if datetime.datetime.strptime(t, '%Y-%m-%d %H:%M:%S').day == datetime.date.today().day:
             result.append(schedule[t])
             break
-
     return result
 
 def get_schedule_tomorrow(group, type):
@@ -101,5 +90,3 @@ def get_schedule_week(group, type):
             if datetime.datetime.strptime(t, '%Y-%m-%d %H:%M:%S').day == diff.day:
                 result.append(schedule[t])
     return result
-
-
