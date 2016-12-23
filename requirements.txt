@@ -1,0 +1,4 @@
+peewee
+requests
+beautifulsoup4
+pyTelegramBotAPI
