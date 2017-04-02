@@ -1,23 +1,29 @@
-#!/usr/bin/env python3
+"""this module parse site of RSVPU"""
+import datetime
 import requests
 from bs4 import BeautifulSoup
-import datetime
+
 
 schedule_url_full_day = 'http://www.rsvpu.ru/raspisanie-zanyatij-ochnoe-otdelenie/'
 schedule_url_half_day = 'http://www.rsvpu.ru/racpisanie-zanyatij-zaochnoe-otdelenie/'
 
 def validate_option(opt):
+    """eliminate variable """
     text = opt.text.lower()
-    if 'вакан' in text or 'выберите' in text:
-        return False
-    else:
-        return True
+    deprecated_values = ('вакан','выберите')
+    check = True
+    for dv in deprecated_values:
+        if dv in text:
+            check = False
+        else:
+            check = True
+    return check
 
 def get_info(soup,text):
     container = {}
     box = soup.find(id=text)
     for opt in box.find_all('option'):
-        if(validate_option(opt)):
+        if validate_option(opt):
             container[opt.text] = opt['value']
     return container
 

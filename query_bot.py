@@ -5,9 +5,16 @@ import datetime
 import locale
 from peewee import *
 
+
 DB = SqliteDatabase('documents/users.db')
-bot = telebot.TeleBot(config.token)
-Weekdays = ('🌕 *Понедельник*', '🌖 *Вторник*', '🌗 *Среда*', '🌘 *Четверг*', '🌑 *Пятница*', '🌒 *Суббота*', '🌓 *Воскресенье*')
+bot = telebot.TeleBot(config.token_test)
+Weekdays = ('🌕 *Понедельник*',
+            '🌖 *Вторник*',
+            '🌗 *Среда*',
+            '🌘 *Четверг*',
+            '🌑 *Пятница*',
+            '🌒 *Суббота*',
+            '🌓 *Воскресенье*',)
 
 class state:
     null = 0
@@ -23,7 +30,6 @@ class User(Model):
     # this data need to query to schedule
     Group_id = CharField(null=True)
     Lecturer_id = CharField(null=True)
-    Distribution = IntegerField(null=True)
     #request_data = CharField(null=True)
     class Meta:
         database = DB
@@ -50,7 +56,7 @@ class search_type:
 
 
 def search(str, type = 0):
-    """return some values to add this into custom keyboard when user enter text with more than one math in list"""
+    """search values for user text"""
     choice = []
     if type != 2:
         for teacher in Teacher.select().where(Teacher.teacher_name.contains(str)).order_by():
@@ -62,7 +68,8 @@ def search(str, type = 0):
             choice.append(group.group_name)
             print(group.group_name)
     return choice
-#todo rename count
+    
+# todo rename count
 def format_day(container,day,count):
     """return day in readable form"""
     text = ' {0}. _{1}_\n'.format(Weekdays[day.weekday()], day.strftime('%d %B'))
@@ -95,21 +102,20 @@ def send_schedule_today(message):
     usr = User.get_or_create(user_id=message.chat.id)
     if usr[0].State == state.gpoup:
         try:
-            text = format_day(parser.get_schedule_today(usr[0].Group_id,0),datetime.date.today(),0)
-            bot.send_message(message.chat.id, text,parse_mode='Markdown')
+            text = format_day(parser.get_schedule_today(usr[0].Group_id,0),datetime.date.today(), 0)
+            bot.send_message(message.chat.id, text, parse_mode='Markdown')
         except:
             bot.send_message(usr[0].user_id, 'Извините, в данный момент я не могу этого сделать.')
 
     elif usr[0].State == state.lecturer:
         try:
-            text = format_day(parser.get_schedule_today(usr[0].Lecturer_id,1),datetime.date.today(),0)
+            text = format_day(parser.get_schedule_today(usr[0].Lecturer_id,1),datetime.date.today(), 0)
             bot.send_message(message.chat.id, text ,parse_mode='Markdown')
         except:
             bot.send_message(usr[0].user_id, 'Извините, в данный момент я не могу этого сделать.')
     else:
         bot.send_message(usr[0].user_id, 'Выберите группу или преподавателя для действия этой команды')
 
-@bot.message_handler(commands=['cancel'])
 
 @bot.message_handler(commands=['schedule_t'])
 def send_schedule_tomorrow(message):
